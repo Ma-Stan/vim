@@ -1,3 +1,51 @@
+local cmp = require'cmp'
+
+local keymap=vim.api.nvim_set_keymap
+keymap('s', '<C-j>', '<cmd>lua require("luasnip").jump(1}<Cr>', {noremap = true})
+keymap('s', '<C-k>', '<cmd>lua require("luasnip").jump(-1}<Cr>', {noremap = true})
+
+cmp.setup({
+  mapping = {
+    -- ['<C-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+    -- ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+    -- ['<C-j>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
+    ['<C-j>'] = cmp.mapping(function(fallback)
+      if cmp.visible() and cmp.get_active_entry() ~= nil then
+        cmp.confirm()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end, { 'i', 'c' }),
+    ['<C-y>'] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
+    ['<C-e>'] = cmp.mapping({
+      i = cmp.mapping.abort(),
+      c = cmp.mapping.close(),
+    }),
+    -- ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    ['<C-n>'] = function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      else
+        fallback()
+      end
+    end,
+    ['<C-p>'] = function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      else
+        fallback()
+      end
+    end,
+  },
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'buffer' },
+    { name = 'path' },
+  })
+})
+
 local nvim_lsp = require('lspconfig')
 local on_attach = function(client, bufnr)
     local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
@@ -46,8 +94,23 @@ local on_attach = function(client, bufnr)
     --   ]], false)
     -- end
 end
+-- local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 require'lspconfig'.clangd.setup {
     cmd = { 'clangd-10' };
     on_attach = on_attach;
+    capabilities = capabilitis;
 }
+
+require'lspconfig'.pylsp.setup {
+    cmd = { 'pylsp' };
+    on_attach = on_attach;
+    capabilities = capabilitis;
+}
+
+-- require'lspconfig'.pyright.setup {
+--     cmd = { 'pyright' };
+--     on_attach = on_attach;
+--     capabilities = capabilitis;
+-- }

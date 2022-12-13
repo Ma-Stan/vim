@@ -1,4 +1,5 @@
-require('config.lsp')
+-- require('config.lsp')
+require('config.tree')
 require('config.telescope')
-require('config.compe')
+require('config.cmp')
 require('config.vim-autoformat')
